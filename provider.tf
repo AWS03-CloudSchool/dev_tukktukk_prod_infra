@@ -22,16 +22,16 @@ provider "kubernetes" {
   experiments {
     manifest_resource = true
   }
-  host                   = aws_eks_cluster.dev_cluster.endpoint
-  cluster_ca_certificate = base64decode(aws_eks_cluster.dev_cluster.certificate_authority.0.data)
-  token                  = data.aws_eks_cluster_auth.dev_cluster.token
+  host                   = aws_eks_cluster.prod_cluster.endpoint
+  cluster_ca_certificate = base64decode(aws_eks_cluster.prod_cluster.certificate_authority.0.data)
+  token                  = data.aws_eks_cluster_auth.prod_cluster.token
 }
 
 # 기본 구성 설정
 provider "helm" {
   kubernetes {
-    host                   = aws_eks_cluster.dev_cluster.endpoint
-    cluster_ca_certificate = base64decode(aws_eks_cluster.dev_cluster.certificate_authority.0.data)
-    token                  = data.aws_eks_cluster_auth.dev_cluster.token
+    host                   = aws_eks_cluster.prod_cluster.endpoint
+    cluster_ca_certificate = base64decode(aws_eks_cluster.prod_cluster.certificate_authority.0.data)
+    token                  = data.aws_eks_cluster_auth.prod_cluster.token
   }
 }

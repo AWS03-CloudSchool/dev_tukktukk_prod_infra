@@ -3,6 +3,16 @@ variable "aws_region" {
   description = "The AWS region to deploy resources into"
 }
 
+variable "tuktuk_env" {
+  type    = string
+  description = "Development Environment Settings Variables"
+}
+
+variable "tuktuk_dns" {
+  type    = string
+  description = "Domain Name Settings"
+}
+
 variable "vpc_cidr" {
   type    = string
   description = "CIDR block for the VPC"
@@ -44,27 +54,43 @@ variable "argocd_sub_dns" {
     description = "argocd sub domain"
 }
 
+variable "s3_bucket_name" {
+    type = string
+    description = "s3 bucket name"
+}
+
 variable "grafana_sub_dns" {
     type = string
     description = "grafana sub domain"
 }
 
-variable "app_sub_dns" {
-    type = string
-    description = "app sub domain"
+# backend service secret
+variable "be_access_key" {
+  description = "The AWS access key"
+  type        = string
 }
 
-variable "s3_bucket_name_log" {
-    type = string
-    description = "s3 bucket name for log"
+variable "be_secret_key" {
+  description = "The AWS secret key"
+  type        = string
 }
 
-variable "s3_bucket_name_tfstate" {
-    type = string
-    description = "s3 bucket name for tfstate"
+variable "be_bucket_name" {
+  description = "The name of the S3 bucket"
+  type        = string
 }
 
-variable "dynamodb_bucket_name_tfstate" {
-    type = string
-    description = "dynamoDB name for tfstate"
+variable "be_database_url" {
+  description = "The database URL"
+  type        = string
+}
+
+variable "mysql_root_username" {
+  description = "The MySQL root username"
+  type        = string
+}
+
+variable "mysql_root_password" {
+  description = "The MySQL root password"
+  type        = string
 }

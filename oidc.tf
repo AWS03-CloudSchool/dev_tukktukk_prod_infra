@@ -1,7 +1,7 @@
 # OIDC Provider url
 data "tls_certificate" "oidc_url" {
-  url = aws_eks_cluster.dev_cluster.identity[0].oidc[0].issuer
-  depends_on = [aws_eks_node_group.dev_node_group]
+  url = aws_eks_cluster.prod_cluster.identity[0].oidc[0].issuer
+  depends_on = [aws_eks_node_group.prod_node_group]
 }
 
 # 자격 증명 공급자 생성

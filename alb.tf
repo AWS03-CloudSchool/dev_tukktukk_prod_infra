@@ -49,7 +49,7 @@ resource "kubernetes_service_account" "aws_load_balancer_controller" {
       "eks.amazonaws.com/role-arn" = "${aws_iam_role.alb_iam_role.arn}"
     }
   }
-  depends_on = [ aws_eks_cluster.dev_cluster, aws_iam_role_policy_attachment.alb_iam_role_attach ,aws_eks_node_group.dev_node_group ]
+  depends_on = [ aws_eks_cluster.prod_cluster, aws_iam_role_policy_attachment.alb_iam_role_attach ,aws_eks_node_group.prod_node_group ]
 }
 
 # alb 배포

@@ -1,6 +1,6 @@
 # LOKI IAM Role을 위한 정책 생성
 resource "aws_iam_policy" "loki_iam_policy" {
-  name        = "Loki-Policy-${var.infra_name}"
+  name        = "AWSS3EksLokiAccess-${var.infra_name}"
   description = "loki for S3 policy"
   policy      = file("${path.module}/policy/loki_iam_policy.json")
   depends_on = [ aws_iam_openid_connect_provider.oidc_provider ]
@@ -9,7 +9,7 @@ resource "aws_iam_policy" "loki_iam_policy" {
 # LOKI IAM Role 생성
 resource "aws_iam_role" "loki_iam_role" {
   depends_on = [aws_iam_policy.loki_iam_policy]
-  name = "Loki-Role-${var.infra_name}"
+  name = "AmazonEKS-Loki-Role-${var.infra_name}"
   assume_role_policy = jsonencode({
     Version: "2012-10-17",
     Statement: [
@@ -101,3 +101,41 @@ resource "helm_release" "prometheus_grafana" {
   depends_on = [ helm_release.promtail, null_resource.update_storageclass ]
 }
 
+# grafana
+resource "kubernetes_ingress_v1" "grafana_ingress" {
+  metadata {
+    name        = "grafana-ingress"
+    namespace   = "monitoring"
+    annotations = {
+      "alb.ingress.kubernetes.io/group.name"      = "tuktuk"
+      "kubernetes.io/ingress.class"               = "alb"
+      "alb.ingress.kubernetes.io/scheme"          = "internet-facing"
+      "alb.ingress.kubernetes.io/listen-ports"    = jsonencode([{"HTTPS": 443},{"HTTP": 80}])
+      "alb.ingress.kubernetes.io/certificate-arn" = "arn:aws:acm:ap-northeast-2:875522371656:certificate/f207c086-5546-471b-b648-58f6e625d90a"
+      "alb.ingress.kubernetes.io/subnets"         = join(",", aws_subnet.public[*].id)
+      "alb.ingress.kubernetes.io/ssl-redirect"    = "443"
+      "alb.ingress.kubernetes.io/target-type"     = "ip"
+    }
+  }
+
+  spec {
+    rule {
+      host = "grafana.${var.tuktuk_dns}.com"
+      http {
+        path {
+          path = "/*"
+          path_type = "ImplementationSpecific"
+          backend {
+            service {
+              name = "prometheus-grafana"
+              port {
+                number = 80
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  depends_on = [ helm_release.prometheus_grafana ]
+}

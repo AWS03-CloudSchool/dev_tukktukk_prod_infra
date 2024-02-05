@@ -1,4 +1,4 @@
-resource "aws_eip" "eip_nat" {
+resource "aws_eip" "nat_prod" {
   vpc = true
 
   lifecycle {
@@ -8,7 +8,7 @@ resource "aws_eip" "eip_nat" {
 }
 
 resource "aws_nat_gateway" "nat_gw" {
-  allocation_id = aws_eip.eip_nat.id
+  allocation_id = aws_eip.nat_prod.id
   subnet_id     = aws_subnet.public[0].id
 
   tags = {
@@ -17,5 +17,5 @@ resource "aws_nat_gateway" "nat_gw" {
 
   # To ensure proper ordering, it is recommended to add an explicit dependency
   # on the Internet Gateway for the VPC.
-  depends_on = [aws_eip.eip_nat]
+  depends_on = [aws_eip.nat_prod]
 }

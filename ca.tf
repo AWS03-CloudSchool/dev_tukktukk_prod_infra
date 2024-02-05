@@ -68,12 +68,12 @@ resource "helm_release" "cluster_autoscaler" {
 
   set {
     name  = "autoDiscovery.clusterName"
-    value = aws_eks_cluster.dev_cluster.name
+    value = aws_eks_cluster.prod_cluster.name
   }
 
   set {
     name  = "awsRegion"
-    value = "ap-northeast-2"
+    value = var.aws_region
   }
 
 

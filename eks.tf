@@ -19,7 +19,7 @@ resource "aws_iam_role" "eks_cluster_role" {
     "Name" = var.infra_name
   }
 
-  depends_on = [ aws_eip.eip_nat ]
+  depends_on = [ aws_eip.nat_prod ]
 }
 
 resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
@@ -28,7 +28,7 @@ resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
 }
 
 # eks 생성
-resource "aws_eks_cluster" "dev_cluster" {
+resource "aws_eks_cluster" "prod_cluster" {
   name     = var.infra_name
   role_arn = aws_iam_role.eks_cluster_role.arn
   version  = "1.28"  
@@ -45,7 +45,7 @@ resource "aws_eks_cluster" "dev_cluster" {
 }
 
 # 인증정보
-data "aws_eks_cluster_auth" "dev_cluster" {
-  name = aws_eks_cluster.dev_cluster.name
-  depends_on = [ aws_eks_cluster.dev_cluster ]
+data "aws_eks_cluster_auth" "prod_cluster" {
+  name = aws_eks_cluster.prod_cluster.name
+  depends_on = [ aws_eks_cluster.prod_cluster ]
 }
