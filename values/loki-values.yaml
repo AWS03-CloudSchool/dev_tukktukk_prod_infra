@@ -1,0 +1,159 @@
+loki:
+  server:
+    http_listen_port: 3100
+    # gRPC란 구글에서 만든 원격 프로시저 호출 프레임워크로, HTTP/2 레이어 위에서 Protocol Buffers를 사용해 직렬화된 바이트 스트림으로 통신하여 JSON 기반의 통신보다 더 가볍고 통신 속도가 빠르다.
+    grpc_server_max_recv_msg_size: 8938360 # default 4194304
+    grpc_server_max_send_msg_size: 8938360 # default 4194304
+    http_server_read_timeout: 300s # default 30, Reade timeout for HTTP server
+    http_server_write_timeout: 300s # default 30, Write timeout for HTTP server
+  structuredConfig:
+    auth_enabled: false
+    compactor:
+      apply_retention_interval: 1h  # default 0s, 삭제 대상이 된 로그 스트림을 얼마나 자주 체크할 것인지 설정합니다.
+      compaction_interval: 10m  # default 10m, Compactor가 작업을 얼마나 자주 수행할 것인지 설정합니다. compactor가 뒤쳐지면 compaction이 가능한 빨리 다시 실행됩니다.
+      retention_delete_delay: 2h  # default 2h, 표시된 청크를 삭제할 때까지의 지연 시간입니다.
+      retention_delete_worker_count: 150  # default 150, 삭제를 수행하는 worker의 수를 설정합니다.
+      retention_enabled: true # default false,
+      shared_store: s3
+      working_directory: /var/loki/compactor  # Compactor가 작업을 수행하는 디렉토리를 설정합니다.
+    limits_config:  # Configuring the retention period
+      max_global_streams_per_user: 10000 # default: 5000, 클러스터 전체에서 사용자당 최대 활성 스트림 수입니다. 0을 입력하면 비활성화됩니다.
+      max_streams_per_user: 10000 # default: 0, 사용자당, ingester당 최대 활성 스트림 수입니다. 0을 입력하면 비활성화됩니다.
+      reject_old_samples: false # default: true
+      retention_period: 30d  # 전역 retention 설정
+      per_stream_rate_limit: 3MB # default: 3MB, 스트림당 초당 최대 바이트 전송률
+      per_stream_rate_limit_burst: 10MB # default 15MB
+      max_query_parallelism: 90 # default 32
+      ingestion_rate_mb: 512  # default 4, 초당 인제스팅 될 수 있는 데이터의 최대 크기를 메가바이트 단위로 설정합니다.
+      ingestion_burst_size_mb: 1024 # default 8, 인제스팅 데이터의 최대 버스트 크기를 메가바이트 단위로 설정합니다.
+    ingester:
+      max_transfer_retries: 0  # 이전 Ingester로부터 chunk를 이관받을 때 재시도할 최대 횟수를 설정합니다.
+      chunk_idle_period: 1h  # default 30m, 로그를 받지 않는 상태에서 chunk를 얼마나 유지할 것인지 설정합니다.
+      chunk_target_size: 1572864  #  default 1572864, 최적의 성능을 위해 목표로 하는 chunk 크기를 바이트 단위로 설정합니다.
+      max_chunk_age: 2h  # default 2h, 메모리에 유지되는 최대 chunk 기간을 설정합니다.
+      chunk_encoding: snappy  # The algorithm to use for compressing chunk. (none, gzip, lz4-64k, snappy,lz4-256k, lz4-1M, lz4, flate, zstd)
+      lifecycler:
+        ring:
+          kvstore:
+            store: memberlist
+          replication_factor: 3
+        heartbeat_timeout: 10m
+      wal:
+        dir: /var/loki/wal
+        replay_memory_ceiling: 800mb
+    storage_config:
+      aws:
+        region: ap-northeast-2
+        bucketnames: tukktukk-logs-storage
+        insecure: false
+        s3forcepathstyle: false
+      tsdb_shipper:
+        shared_store: s3
+        active_index_directory: /var/loki/tsdb-index
+        cache_location: /var/loki/tsdb-cache
+      index_queries_cache_config:
+        memcached:
+          batch_size: 100  # default 0, Memcached에 쿼리를 배치하는 크기를 설정합니다.
+          parallelism: 100  # default 0, 동시에 처리할 수 있는 쿼리의 최대 개수를 설정합니다.
+    schema_config:
+      configs:
+        - from: 2023-10-31
+          store: tsdb
+          object_store: s3
+          schema: v12
+          index:
+            prefix: loki_index_
+            period: 24h
+    chunk_store_config:  # chunk_store_config 블록은 청크가 캐시되는 방식과 청크를 백업 저장소에 저장하기 전에 대기하는 시간을 구성합니다.
+      max_look_back_period: 48h  # default 0s, 과거의 로그를 얼마나 오래 조회할 것인지 설정합니다.
+      chunk_cache_config:
+        memcached:
+          batch_size: 100  # default 1024, Memcached에 chunk를 배치하는 크기를 설정합니다.
+          parallelism: 100  # default 100, 동시에 처리할 수 있는 chunk의 최대 개수를 설정합니다.
+      write_dedupe_cache_config:
+        memcached:
+          batch_size: 100  # default 0, Memcached에 write dedupe 정보를 배치하는 크기를 설정합니다.
+          parallelism: 100  # default 0, 동시에 처리할 수 있는 write dedupe의 최대 개수를 설정합니다.
+    querier:
+      max_concurrent: 15 # default 10, 하나의 쿼리어가 병렬로 처리할 수 있는 쿼리 수를 보여줍니다. CPU 수의 약 2배 정도를 넣는 것이 좋습니다. 기본값은 10입니다(이 숫자에 주의하세요)
+    query_scheduler:
+      max_outstanding_requests_per_tenant: 2048 # default 100, 쿼리 스케줄러당 테넌트당 최대 미결 요청 수입니다. 이 제한을 초과하는 인플라이트  요청은 HTTP 응답 상태 코드 429로 실패합니다.
+
+serviceAccount:
+  create: true
+  name: "loki-sa" # 위에서 SA 작성할 때 정해준 이름
+  imagePullSecrets: []
+  automountServiceAccountToken: true
+
+ingester:
+  replicas: 3 # ingester 숫자 정해줌
+  maxUnavailable: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 1Gi
+  persistence: 
+    enabled: true
+    claims:
+      - name: data
+        size: 1Gi
+
+distributor:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 256Mi
+
+querier:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 1Gi
+    limits:
+      memory: 1Gi
+
+queryFrontend:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 1Gi
+    limits:
+      memory: 1Gi
+
+gateway:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 1Gi
+    limits:
+      memory: 1Gi
+
+compactor:
+  enabled: true
+  serviceAccount:
+    create: true
+    name: "loki-sa-compactor" # 위에서 SA 작성할 때 정해준 이름
+    automountServiceAccountToken: true
+
+# index_gateway 블록은 개체 저장소와 지속적으로 상호 작용할 필요 없이 인덱스 쿼리 서비스를 담당하는 Loki 인덱스 게이트웨이 서버를 구성합니다.
+indexGateway:
+  enabled: true
+
+memcachedChunks:
+  enabled: true
+  extraArgs:
+    - -I 32m
+
+memcachedFrontend:
+  enabled: true
+  extraArgs:
+    - -I 32m
+
+memcachedIndexQueries:
+  enabled: true
+  extraArgs:
+    - -I 32m

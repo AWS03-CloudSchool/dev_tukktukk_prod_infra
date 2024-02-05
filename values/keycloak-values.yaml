@@ -1,0 +1,44 @@
+service:
+  type: NodePort
+
+auth:
+  adminUser: admin
+  adminPassword: wedding05
+
+ingress:
+  enabled: "false"
+  # hostname: "keycloak.tukktukk.com"
+  # ingressClassName: "nginx"
+  # # servicePort: https
+
+extraEnvVars:
+  # - name: KEYCLOAK_PROXY_ADDRESS_FORWARDING
+  #   value: "true"
+  # - name: KC_HTTP_ENABLED
+  #   value: "true"
+  # - name: KC_HTTPS_ENABLED
+  #   value: "false"
+  - name: KC_HOSTNAME_STRICT_HTTPS
+    value: "false"
+  - name: KC_HOSTNAME_STRICT
+    value: "false"
+  - name: KC_PROXY
+    value: edge
+
+# readinessProbe:
+#   httpGet:
+#     path: /realms/master
+#     port: http
+#   initialDelaySeconds: 5
+#   periodSeconds: 3
+#   timeoutSeconds: 5
+#   failureThreshold: 3
+
+# livenessProbe:
+#   httpGet:
+#     path: /realms/master
+#     port: http
+#   initialDelaySeconds: 5
+#   periodSeconds: 3
+#   timeoutSeconds: 5
+#   failureThreshold: 3
