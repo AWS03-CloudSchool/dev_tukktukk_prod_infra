@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "court_image_storage" {
-  bucket = "${var.tuktuk_env}-court-image-storage"
+  bucket = "${var.be_bucket_name}"
 }
 
 resource "aws_s3_bucket_public_access_block" "court_image_storage_accblock" {

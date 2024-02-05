@@ -48,7 +48,7 @@ resource "aws_db_instance" "rds" {
   identifier             = "rds"
   instance_class         = "db.t3.micro"
   storage_type           = "gp3"
-  allocated_storage      = 5
+  allocated_storage      = 200
   engine                 = "mysql"
   engine_version         = "8.0"
   username               = var.mysql_root_username

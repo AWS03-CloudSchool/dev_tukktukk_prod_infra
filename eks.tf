@@ -19,7 +19,7 @@ resource "aws_iam_role" "eks_cluster_role" {
     "Name" = var.infra_name
   }
 
-  depends_on = [ aws_eip.nat_prod ]
+  depends_on = [ aws_eip.eip_nat ]
 }
 
 resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
