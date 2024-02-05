@@ -45,7 +45,6 @@ resource "aws_eks_node_group" "prod_node_group" {
   }
 
   instance_types = ["t3.large"]
-  capacity_type  = "SPOT"
 
   depends_on = [
     aws_eks_cluster.prod_cluster,
